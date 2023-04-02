@@ -6,6 +6,7 @@ class Query:
         self.number = int(query[1])
         if self.type == 'add':
             self.name = query[2]
+            
 
 def read_queries():
     n = int(input())
