@@ -10,9 +10,8 @@ class phoneNumber:
     multiplier = 66
     prime = 29
 
-
     def __init__(self):
-        self.buckets = [[] for i in range(100)]
+        self.buckets = [0] * self.size
 
     def _hash_func(self, s):
         hashed = (s * self.multiplier) % self.prime
@@ -20,23 +19,17 @@ class phoneNumber:
     
     def add(self, number, name):
         hashed = self._hash_func(number)
-        bucket = self.buckets[hashed]
-        if name not in bucket:
-            self.buckets[hashed] = [name] + bucket
+        self.buckets[hashed] = name
 
     def delete(self, number):
         hashed = self._hash_func(number)
-        for i in range(len(self.buckets)):
-            if i == hashed:
-                self.buckets[i] = 0
-                break
+        self.buckets[hashed] = 0
 
     def find(self, number):
         hashed = self._hash_func(number)
-        if self.buckets[hashed] != 0:
-            my_string = ' '.join(self.buckets[hashed])
-            return my_string
-        return "not found"
+        if self.buckets[hashed] == 0:
+            return 'not found'
+        return self.buckets[hashed]
 
 
 def read_queries():
