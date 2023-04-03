@@ -1,11 +1,42 @@
-# python3
-
 class Query:
     def __init__(self, query):
         self.type = query[0]
         self.number = int(query[1])
         if self.type == 'add':
             self.name = query[2]
+
+class phoneNumber:
+    size = 100
+    multiplier = 66
+    prime = 29
+
+    def __init__(self):
+        self.buckets = [[] for i in range(self.size)]
+
+    def _hash_func(self, s):
+        hashed = (s * self.multiplier) % self.prime
+        return hashed % self.size
+    
+    def add(self, number, name):
+        hashed = self._hash_func(number)
+        bucket = self.buckets[hashed]
+        if name not in bucket:
+            self.buckets[hashed] = [name] + bucket
+
+    def delete(self, number):
+        hashed = self._hash_func(number)
+        for i in range(len(self.buckets)):
+            if i == hashed:
+                self.buckets[i] = []
+                break
+
+    def find(self, number):
+        hashed = self._hash_func(number)
+        if self.buckets[hashed]:
+            return self.buckets[hashed][0]
+        return "not found"
+
+
 
 def read_queries():
     n = int(input())
@@ -16,32 +47,15 @@ def write_responses(result):
 
 def process_queries(queries):
     result = []
-    # Keep list of all existing (i.e. not deleted yet) contacts.
-    contacts = []
+    contacts = phoneNumber()
     for cur_query in queries:
         if cur_query.type == 'add':
-            # if we already have contact with such number,
-            # we should rewrite contact's name
-            for contact in contacts:
-                if contact.number == cur_query.number:
-                    contact.name = cur_query.name
-                    break
-            else: # otherwise, just add it
-                contacts.append(cur_query)
+            contacts.add(cur_query.number, cur_query.name)
         elif cur_query.type == 'del':
-            for j in range(len(contacts)):
-                if contacts[j].number == cur_query.number:
-                    contacts.pop(j)
-                    break
+            contacts.delete(cur_query.number)
         else:
-            response = 'not found'
-            for contact in contacts:
-                if contact.number == cur_query.number:
-                    response = contact.name
-                    break
-            result.append(response)
+            result.append(contacts.find(cur_query.number))
     return result
 
 if __name__ == '__main__':
     write_responses(process_queries(read_queries()))
-
