@@ -6,43 +6,65 @@ class Query:
         self.number = int(query[1])
         if self.type == 'add':
             self.name = query[2]
-            
+        elif self.type == 'find':
+            self.name = None
+
+class phoneNumber:
+    size = 100
+    multiplier = 66
+    prime = 29
+
+    def __init__(self):
+        self.buckets = [[] for _ in range(self.size)]
+
+    def _hash_func(self, number):
+        hashed = (number * self.multiplier) % self.prime
+        return hashed % self.size
+    
+    def add(self, number, name):
+        hashed = self._hash_func(number)
+        bucket = self.buckets[hashed]
+        for i in range(len(bucket)):
+            if bucket[i][0] == number:
+                bucket[i] = (number, name)
+                break
+        else:
+            self.buckets[hashed].append((number, name))
+
+    def delete(self, number):
+        hashed = self._hash_func(number)
+        bucket = self.buckets[hashed]
+        for item in bucket:
+            if item[0] == number:
+                bucket.remove(item)
+                break
+
+    def find(self, number):
+        hashed = self._hash_func(number)
+        for item in self.buckets[hashed]:
+            if item[0] == number:
+                return item[1]
+        return 'not found'
+
 
 def read_queries():
     n = int(input())
-    return [Query(input().split()) for i in range(n)]
+    return [Query(input().split()) for _ in range(n)]
 
 def write_responses(result):
     print('\n'.join(result))
 
 def process_queries(queries):
     result = []
-    # Keep list of all existing (i.e. not deleted yet) contacts.
-    contacts = []
-    for cur_query in queries:
-        if cur_query.type == 'add':
-            # if we already have contact with such number,
-            # we should rewrite contact's name
-            for contact in contacts:
-                if contact.number == cur_query.number:
-                    contact.name = cur_query.name
-                    break
-            else: # otherwise, just add it
-                contacts.append(cur_query)
-        elif cur_query.type == 'del':
-            for j in range(len(contacts)):
-                if contacts[j].number == cur_query.number:
-                    contacts.pop(j)
-                    break
+    contacts = phoneNumber()
+    for query in queries:
+        if query.type == 'add':
+            contacts.add(query.number, query.name)
+        elif query.type == 'del':
+            contacts.delete(query.number)
         else:
-            response = 'not found'
-            for contact in contacts:
-                if contact.number == cur_query.number:
-                    response = contact.name
-                    break
-            result.append(response)
+            result.append(contacts.find(query.number))
     return result
 
 if __name__ == '__main__':
     write_responses(process_queries(read_queries()))
-
